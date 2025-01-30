@@ -14,7 +14,7 @@ default_args = {
 }
 
 # Definir parâmetros da API do clima
-API_KEY = 'b3623be5384e123fc5bba09640cb3ff4'
+API_KEY = 'your_key'
 CITY = 'Natal,RN'
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
 URL = BASE_URL + "appid=" + API_KEY + "&q=" + CITY + "&units=metric"
