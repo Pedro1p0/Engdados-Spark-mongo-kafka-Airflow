@@ -7,7 +7,7 @@ from pyspark.sql.types import StructType, StructField, StringType
 def create_mongo_connection():
     try:
         # Conectando ao MongoDB Atlas
-        client = MongoClient("mongodb+srv://pedroclemente119:ISCigIWBU3AmVb4Q@mongopyshark.b2mno.mongodb.net/?retryWrites=true&w=majority&appName=MongoPyShark")
+        client = MongoClient("mongodb+srv://user:password@mongopyshark.b2mno.mongodb.net/?retryWrites=true&w=majority&appName=MongoPyShark")
         db = client['spark_streams']
         return db
     except Exception as e:
@@ -111,7 +111,7 @@ if __name__ == "__main__":
                         .option("checkpointLocation", "/tmp/checkpoint")
                         .option("writeConcern.w", "majority")
                         .option("mongo.batchSize", "1000")
-                        .option("uri", "mongodb+srv://pedroclemente119:ISCigIWBU3AmVb4Q@mongopyshark.b2mno.mongodb.net/mongopyshark")
+                        .option("uri", "mongodb+srv://user:password@mongopyshark.b2mno.mongodb.net/mongopyshark")
                         .start())
                     # Teste de apenas streaming para o console
                     if selection_df:
