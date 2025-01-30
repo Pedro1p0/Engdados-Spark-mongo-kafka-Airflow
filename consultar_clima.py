@@ -11,7 +11,8 @@ KAFKA_SERVER = 'localhost:9092'
 
 # URL da API OpenWeatherMap
 # URL = f'http://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric&lang=pt'
-API_KEY = 'b3623be5384e123fc5bba09640cb3ff4'
+# You need get your own key
+API_KEY = 'your_key'
 CITY = "NATAL"
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
 URL = BASE_URL + "appid=" + API_KEY + "&q=" + CITY + "&units=metric"
