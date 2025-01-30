@@ -7,7 +7,7 @@ from pyspark.sql.types import StructType, StructField, StringType
 def create_mongo_connection():
     try:
         # Conectando ao MongoDB Atlas
-        client = MongoClient("mongodb+srv://user:password@mongopyshark.b2mno.mongodb.net/?retryWrites=true&w=majority&appName=MongoPyShark")
+        client = MongoClient("mongodb+srv://pedroclemente119:ISCigIWBU3AmVb4Q@mongopyshark.b2mno.mongodb.net/?retryWrites=true&w=majority&appName=MongoPyShark")
         db = client['spark_streams']
         return db
     except Exception as e:
@@ -28,10 +28,11 @@ def create_collection(db):
 def insert_data(db, **kwargs):
     print("Inserting data...")
     
-    user_data = {key: kwargs.get(key) for key in ['id', 'name', 'email']}
+    user_data = {key: kwargs.get(key) for key in ['id', 'first_name', 'last_name', 'gender', 'address', 'post_code',
+                                                   'email', 'username', 'dob', 'registered_date', 'phone', 'picture']}
     try:
         db['created_users'].insert_one(user_data)
-        logging.info(f"Data inserted for {user_data['name']} {user_data['email']}")
+        logging.info(f"Data inserted for {user_data['first_name']} {user_data['last_name']}")
     except Exception as e:
         logging.error(f'Could not insert data due to {e}')
 
@@ -58,9 +59,6 @@ def connect_to_kafka(spark_conn):
             .option('group.id', 'spark-consumer-group')\
             .option('startingOffsets', 'earliest') \
             .load()
-
-        print(spark_df.isStreaming)
-
         logging.info("Kafka dataframe created successfully")
         return spark_df
     except Exception as e:
@@ -77,7 +75,7 @@ def create_selection_df_from_kafka(spark_df):
         StructField("name", StringType(), False),
         StructField("email", StringType(), False),
     ])
-
+    print(schema)
     try:
         sel = spark_df.selectExpr("CAST(value AS STRING)") \
             .select(from_json(col('value'), schema).alias('data')).select("data.*")
@@ -98,33 +96,22 @@ if __name__ == "__main__":
         # Connect to Kafka
         spark_df = connect_to_kafka(spark_conn)
         selection_df = create_selection_df_from_kafka(spark_df)
+
         if selection_df:
             db = create_mongo_connection()
+
             if db is not None:
                 create_collection(db)
-                db['created_users'].insert_one({'id': '123', 'name': 'Test User', 'email': 'test@example.com'})
-                print("Teste de inserção realizado com sucesso!")
                 logging.info("Streaming is being started...")
                 try:
                     streaming_query = (selection_df.writeStream
-                        .format("mongodb")
-                        .option("checkpointLocation", "/tmp/checkpoint")
-                        .option("writeConcern.w", "majority")
-                        .option("mongo.batchSize", "1000")
-                        .option("uri", "mongodb+srv://user:password@mongopyshark.b2mno.mongodb.net/mongopyshark")
-                        .start())
-                    # Teste de apenas streaming para o console
-                    if selection_df:
-                        checkpoint_location = "/tmp/checkpoint"
-                        query = selection_df.writeStream \
-                            .outputMode("append") \
-                            .format("console") \
-                            .option("checkpointLocation", checkpoint_location) \
-                            .start()
-                        try:
-                            query.awaitTermination()
-                        except Exception as e:
-                            logging.error(f"Streaming terminated with error: {e}")
+                                      .format("mongodb")
+                                      .option("checkpointLocation", "/tmp/checkpoint")
+                                      .option("writeConcern.w", "majority")
+                                      .option("mongo.batchSize", "1000")
+                                      .option("uri", "mongodb+srv://pedroclemente119:ISCigIWBU3AmVb4Q@mongopyshark.b2mno.mongodb.net/mongopyshark")
+                                      .start())
+                    streaming_query.awaitTermination()
                 except Exception as e:
                     logging.error(f"Error during streaming: {e}")
             else:
